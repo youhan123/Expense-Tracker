@@ -26,7 +26,7 @@ def add_expense():
     print("     Add Expenses     ")
     print("======================")
     date = input("Enter date (DD/MM/YYYY) : ")
-    desc = input("Enter description")
+    desc = input("Enter description : ")
 
     while True:
         amount_text = input("Enter expense amount (RM x) : ")
