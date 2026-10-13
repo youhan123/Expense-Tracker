@@ -1,4 +1,25 @@
+import json
+
+expenses_file = "expenses.json"
 expenses = [] 
+
+def load_expenses():
+    global expenses
+    try:
+        # 'r' means read mode
+        with open(expenses_file, "r") as file:
+            expenses = json.load(file)
+    except FileNotFoundError:
+        # If it's the first time running the app, the file won't exist yet
+        expenses = []
+    except json.JSONDecodeError:
+        # If the file is empty or corrupted
+        expenses = []
+
+def save_expenses():
+    # 'w' means write mode (overwrites the file with new data)
+    with open(expenses_file, "w") as file:
+        json.dump(expenses, file, indent=4)
 
 def add_expense():
     print("======================")
@@ -20,6 +41,7 @@ def add_expense():
                    "desc" : desc}
 
     expenses.append(new_expense)
+    save_expenses()
 
     print("Expenses added successfully!")
 
@@ -65,12 +87,14 @@ def edit_expense():
                     new_date = input("Enter new date: ")
                     expenses[item_no-1]['date'] = new_date
                     print("Edit Success!")
+                    save_expenses()
                     break
 
                 elif edit_category.lower() == 'description' :
                     new_description = input("Enter new description: ")
                     expenses[item_no-1]['desc'] = new_description
                     print("Edit success!")
+                    save_expenses()
                     break
 
                 elif edit_category.lower() == 'amount' :
@@ -84,6 +108,7 @@ def edit_expense():
                         else:
                             expenses[item_no -1]['amount'] = new
                             print("Edit success!")
+                            save_expenses()
                             break
 
                     except ValueError:
@@ -115,6 +140,7 @@ def delete_expense():
             else:
                 deleted_item = expenses.pop(item_no -1)
                 print(f"Success! Deleted {deleted_item['desc']}(RM{deleted_item['amount']})")
+                save_expenses()
                 break
 
         except ValueError:
@@ -125,8 +151,11 @@ def calculate_total():
 
     for expense in expenses:
         total+= expense['amount']
+        
+    print(f"\nTotal Expenses: RM {total:.2f}")
 
 def main():
+    load_expenses()
     while True:
         print("\n--- Expense Tracker ---")
         print("1. Add Expense")
