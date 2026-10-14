@@ -85,23 +85,24 @@ def add_expense():
     print("Expenses added successfully!")
 
 def view_expenses():
-    print("======================")
-    print("    View Expenses     ")
-    print("======================")
+    print("="*67)
+    print("View Expenses".center(67))
+    print("="*67)
 
     if not expenses:
         print("No expenses recorded.")
         return
 
-    print(f"{'No.':<5} | {'Date':<12} | {'Description':<20} | {'Amount'}")
+    print(f"{'No.':<5} | {'Date':<12} | {'Description':<20} | {'Amount':<10} | {'category':<20}")
     print("-" * 70)
 
     for i, expense in enumerate(expenses, start=1):
         date = expense['date']
         desc = expense['desc']
         amount = expense['amount']
+        category = expense['category']
         
-        print(f"{i:<5} | {date:<12} | {desc:<20} | RM {amount:<10.2f}")
+        print(f"{i:<5} | {date:<12} | {desc:<20} | RM {amount:<10.2f} | {category:<20}")
 
 def edit_expense():
     view_expenses()
@@ -230,7 +231,7 @@ def expenses_summary():
         cat_choice = input("Enter category number (1-4): ")
         
         # Map the number to the exact string used in your add_expense function
-        cat_menu = {'1': 'Food and beverages', '2': 'Billings', '3': 'Entertainment', '4': 'Others'}
+        cat_menu = {'1': 'Food and Beverages', '2': 'Billings', '3': 'Entertainment', '4': 'Others'}
         selected_cat = cat_menu.get(cat_choice)
         
         if selected_cat:
@@ -284,7 +285,6 @@ def main():
             delete_expense()
         elif choice == '5':
             expenses_summary()
-            calculate_total()
         elif choice == '6':
             print("Goodbye!")
             break

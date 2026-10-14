@@ -1,1 +1,8 @@
-[]
+[
+    {
+        "date": "10/10/2026",
+        "amount": 9.0,
+        "category": "Food and Beverages",
+        "desc": "Hokkien mee"
+    }
+]
