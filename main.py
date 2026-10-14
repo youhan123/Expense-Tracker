@@ -1,4 +1,5 @@
 import json
+from datetime import datetime
 
 expenses_file = "expenses.json"
 expenses = [] 
@@ -25,7 +26,44 @@ def add_expense():
     print("======================")
     print("     Add Expenses     ")
     print("======================")
-    date = input("Enter date (DD/MM/YYYY) : ")
+
+    while True:
+        date = input("Enter date (DD/MM/YYYY) : ")
+        try:
+            datetime.strptime(date, "%d/%m/%Y")
+            break
+        except ValueError:
+            print("Invalid date format. Please exactly match DD/MM/YYYY.")
+
+# Map the numbers directly to the names
+    cat_menu = {
+        1: "Food and Beverages", 
+        2: "Billings", 
+        3: "Entertainment", 
+        4: "Others"
+    }
+
+    while True:
+        print("Please select expense category")
+        print("===============================")
+        print("1. Food and Beverages")
+        print("2. Billings ")
+        print("3. Entertainment ")
+        print("4. Others")
+
+        option = input("Expense category (1,2,3,4): ")
+
+        try:
+            cat = int(option)
+            if cat in cat_menu:
+                category = cat_menu[cat] 
+                break
+            else:
+                print("Please select 1, 2, 3, or 4")
+                
+        except ValueError:
+            print("Try again, please enter valid input! ")
+            
     desc = input("Enter description : ")
 
     while True:
@@ -38,6 +76,7 @@ def add_expense():
 
     new_expense = {"date" : date,
                    "amount" : amount,
+                   "category" : category,
                    "desc" : desc}
 
     expenses.append(new_expense)
@@ -84,11 +123,16 @@ def edit_expense():
                 edit_category = input("Please type the category you want to edit (eg. Date/Description/Amount): ")
 
                 if edit_category.lower() == 'date':
-                    new_date = input("Enter new date: ")
-                    expenses[item_no-1]['date'] = new_date
-                    print("Edit Success!")
-                    save_expenses()
-                    break
+                    while True:
+                        new_date = input("Enter new date: ")
+                        try:
+                            datetime.strptime(new_date,"%d/%m/%Y")
+                            expenses[item_no-1]['date'] = new_date
+                            print("Edit Success!")
+                            save_expenses()
+                            break
+                        except ValueError:
+                            print("Invalid date format. Please exactly match DD/MM/YYYY.")
 
                 elif edit_category.lower() == 'description' :
                     new_description = input("Enter new description: ")
@@ -146,13 +190,76 @@ def delete_expense():
         except ValueError:
             print("Please enter a valid input")
 
-def calculate_total():
+def calculate_total(data_list):
     total = 0
-
-    for expense in expenses:
-        total+= expense['amount']
+    for expense in data_list:
+        total += expense['amount']
         
-    print(f"\nTotal Expenses: RM {total:.2f}")
+    print(f"\nTotal for selected expenses: RM {total:.2f}")
+
+def expenses_summary():
+    print("\n======================")
+    print("   Expenses Summary   ")
+    print("======================")
+    print("1. View All")
+    print("2. Filter by Month")
+    print("3. Filter by Category")
+    
+    choice = input("Choose a filter option: ")
+    filtered_list = []
+
+    if choice == '1':
+        # View All: Just use the master list
+        filtered_list = expenses
+
+    elif choice == '2':
+        # Filter by Month
+        month = input("Enter month (MM) e.g., 10 : ")
+        for expense in expenses:
+            # date format is strictly DD/MM/YYYY
+            # .split('/') turns "14/10/2026" into a list: ['14', '10', '2026']
+            date_parts = expense['date'].split('/')
+            
+            # Check if the month (index 1) matches the user's input
+            if len(date_parts) == 3 and date_parts[1] == month:
+                filtered_list.append(expense)
+
+    elif choice == '3':
+        # Filter by Category
+        print("1. Food and Beverages | 2. Billings | 3. Entertainment | 4. Others")
+        cat_choice = input("Enter category number (1-4): ")
+        
+        # Map the number to the exact string used in your add_expense function
+        cat_menu = {'1': 'Food and beverages', '2': 'Billings', '3': 'Entertainment', '4': 'Others'}
+        selected_cat = cat_menu.get(cat_choice)
+        
+        if selected_cat:
+            for expense in expenses:
+                if expense.get('category') == selected_cat:
+                    filtered_list.append(expense)
+        else:
+            print("Invalid category selection.")
+            return
+            
+    else:
+        print("Invalid choice.")
+        return
+
+    # --- Display the Results ---
+    if not filtered_list:
+        print("\nNo expenses found for this filter.")
+        return
+
+    # Print the filtered items neatly
+    print(f"\n{'Date':<12} | {'Category':<20} | {'Description':<20} | {'Amount'}")
+    print("-" * 75)
+    for exp in filtered_list:
+        # Use .get() for category just in case older saved data doesn't have it
+        cat = exp.get('category', 'Uncategorized')
+        print(f"{exp['date']:<12} | {cat:<20} | {exp['desc']:<20} | RM {exp['amount']:<10.2f}")
+
+    # Pass our newly created list to the math function!
+    calculate_total(filtered_list)
 
 def main():
     load_expenses()
@@ -162,7 +269,7 @@ def main():
         print("2. View Expenses")
         print("3. Edit Expense")
         print("4. Delete Expense")
-        print("5. View Total")
+        print("5. Expenses Summary")
         print("6. Exit")
         
         choice = input("Choose an option: ")
@@ -176,6 +283,7 @@ def main():
         elif choice == '4':
             delete_expense()
         elif choice == '5':
+            expenses_summary()
             calculate_total()
         elif choice == '6':
             print("Goodbye!")
