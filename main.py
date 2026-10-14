@@ -1,8 +1,17 @@
 import json
+import os
 from datetime import datetime
 
 expenses_file = "expenses.json"
 expenses = [] 
+
+def clear_screen():
+    # 'nt' is Windows. If it's Windows, use 'cls', otherwise use 'clear'
+    os.system('cls' if os.name == 'nt' else 'clear')
+
+def pause():
+    input("\nPress Enter to continue...")
+    clear_screen()
 
 def load_expenses():
     global expenses
@@ -23,9 +32,9 @@ def save_expenses():
         json.dump(expenses, file, indent=4)
 
 def add_expense():
-    print("======================")
-    print("     Add Expenses     ")
-    print("======================")
+    print("\n" + "="*30)
+    print("Add Expenses".center(30))
+    print("="*30)
 
     while True:
         date = input("Enter date (DD/MM/YYYY) : ")
@@ -44,14 +53,15 @@ def add_expense():
     }
 
     while True:
-        print("Please select expense category")
-        print("===============================")
+        print("\n" +"="*30)
+        print("Expense Category".center(30))
+        print("="*30)
         print("1. Food and Beverages")
         print("2. Billings ")
         print("3. Entertainment ")
         print("4. Others")
 
-        option = input("Expense category (1,2,3,4): ")
+        option = input("\nPlease select expense category(1,2,3,4): ")
 
         try:
             cat = int(option)
@@ -59,7 +69,7 @@ def add_expense():
                 category = cat_menu[cat] 
                 break
             else:
-                print("Please select 1, 2, 3, or 4")
+                print("Try again, please select 1, 2, 3, or 4")
                 
         except ValueError:
             print("Try again, please enter valid input! ")
@@ -85,16 +95,16 @@ def add_expense():
     print("Expenses added successfully!")
 
 def view_expenses():
-    print("="*67)
-    print("View Expenses".center(67))
-    print("="*67)
+    print("\n"+"="*80)
+    print("Expenses".center(80))
+    print("="*80)
 
     if not expenses:
         print("No expenses recorded.")
         return
 
-    print(f"{'No.':<5} | {'Date':<12} | {'Description':<20} | {'Amount':<10} | {'category':<20}")
-    print("-" * 70)
+    print(f"{'No.':<5} | {'Date':<12} | {'Description':<20} | {'Amount':<13} | {'category':<20}")
+    print("-" * 80)
 
     for i, expense in enumerate(expenses, start=1):
         date = expense['date']
@@ -108,10 +118,10 @@ def edit_expense():
     view_expenses()
 
     while True:
-        choice = input("Please select the expense you want to edit ( or q to cancel ): ")
+        choice = input("\nPlease select the no. of the expense you want to edit ( or q to cancel ): ")
 
         if choice.lower() == 'q':
-            print("Cancelled edit process")
+            print("Cancelled edit process\n")
             break
 
         try:
@@ -143,7 +153,7 @@ def edit_expense():
                     break
 
                 elif edit_category.lower() == 'amount' :
-                    new_amount = input("Enter new amount (RM)")
+                    new_amount = input("Enter new amount (RM) : ")
                     try:
                         new = float(new_amount)
 
@@ -164,10 +174,6 @@ def edit_expense():
             print("Please enter a valid input")
 
 def delete_expense():
-    print("======================")
-    print("    Delete Expenses   ")
-    print("======================")
-
     view_expenses()
 
     while True:
@@ -252,8 +258,9 @@ def expenses_summary():
         return
 
     # Print the filtered items neatly
-    print(f"\n{'Date':<12} | {'Category':<20} | {'Description':<20} | {'Amount'}")
-    print("-" * 75)
+    print("\n"+"=" * 75)
+    print(f"{'Date':<12} | {'Category':<20} | {'Description':<20} | {'Amount'}")
+    print("=" * 75)
     for exp in filtered_list:
         # Use .get() for category just in case older saved data doesn't have it
         cat = exp.get('category', 'Uncategorized')
@@ -265,7 +272,10 @@ def expenses_summary():
 def main():
     load_expenses()
     while True:
-        print("\n--- Expense Tracker ---")
+        clear_screen()
+        print("="*30)
+        print("Expense Tracker".center(30))
+        print("="*30)
         print("1. Add Expense")
         print("2. View Expenses")
         print("3. Edit Expense")
@@ -277,16 +287,21 @@ def main():
         
         if choice == '1':
             add_expense()
+            pause()
         elif choice == '2':
             view_expenses()
+            pause()
         elif choice == '3':
             edit_expense()
+            pause()
         elif choice == '4':
             delete_expense()
+            pause()
         elif choice == '5':
             expenses_summary()
+            pause()
         elif choice == '6':
-            print("Goodbye!")
+            print("Thanks for using!")
             break
         else:
             print("Invalid choice, try again.")

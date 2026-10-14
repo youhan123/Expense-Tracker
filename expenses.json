@@ -4,5 +4,23 @@
         "amount": 9.0,
         "category": "Food and Beverages",
         "desc": "Hokkien mee"
+    },
+    {
+        "date": "8/8/2026",
+        "amount": 40.0,
+        "category": "Others",
+        "desc": "donation"
+    },
+    {
+        "date": "9/9/2026",
+        "amount": 3.0,
+        "category": "Food and Beverages",
+        "desc": "coca cola"
+    },
+    {
+        "date": "7/7/2026",
+        "amount": 200.0,
+        "category": "Billings",
+        "desc": "electric"
     }
 ]
