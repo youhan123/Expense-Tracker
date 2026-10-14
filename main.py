@@ -1,9 +1,25 @@
-import json
 import os
+import sqlite3
 from datetime import datetime
 
-expenses_file = "expenses.json"
-expenses = [] 
+#Connect to the database (this automatically creates 'expenses.db' if it doesn't exist)
+conn = sqlite3.connect("expenses.db")
+#This makes the database return rows that act like dictionaries!
+conn.row_factory = sqlite3.Row 
+cursor = conn.cursor()
+
+def setup_database():
+    #Write an SQL query to create our table with specific data types
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS expenses (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            date TEXT,
+            category TEXT,
+            description TEXT,
+            amount REAL
+        )
+    ''')
+    conn.commit() # Always commit changes to save them
 
 def clear_screen():
     # 'nt' is Windows. If it's Windows, use 'cls', otherwise use 'clear'
@@ -12,24 +28,6 @@ def clear_screen():
 def pause():
     input("\nPress Enter to continue...")
     clear_screen()
-
-def load_expenses():
-    global expenses
-    try:
-        # 'r' means read mode
-        with open(expenses_file, "r") as file:
-            expenses = json.load(file)
-    except FileNotFoundError:
-        # If it's the first time running the app, the file won't exist yet
-        expenses = []
-    except json.JSONDecodeError:
-        # If the file is empty or corrupted
-        expenses = []
-
-def save_expenses():
-    # 'w' means write mode (overwrites the file with new data)
-    with open(expenses_file, "w") as file:
-        json.dump(expenses, file, indent=4)
 
 def add_expense():
     print("\n" + "="*30)
@@ -84,13 +82,12 @@ def add_expense():
         except ValueError:
             print("Please enter a valid input")
 
-    new_expense = {"date" : date,
-                   "amount" : amount,
-                   "category" : category,
-                   "desc" : desc}
-
-    expenses.append(new_expense)
-    save_expenses()
+    cursor.execute('''
+            INSERT INTO expenses (date, category, description, amount)
+            VALUES (?, ?, ?, ?)
+        ''', (date, category, desc, amount))
+        
+    conn.commit()
 
     print("Expenses added successfully!")
 
@@ -99,81 +96,87 @@ def view_expenses():
     print("Expenses".center(80))
     print("="*80)
 
-    if not expenses:
-        print("No expenses recorded.")
-        return
+    # SQL SELECT: Grab everything
+    cursor.execute("SELECT * FROM expenses")
+    rows = cursor.fetchall()
 
-    print(f"{'No.':<5} | {'Date':<12} | {'Description':<20} | {'Amount':<13} | {'category':<20}")
+    if not rows:
+        print("No expenses recorded.")
+        return False # Return False so edit/delete know it's empty
+
+    print(f"{'ID':<5} | {'Date':<12} | {'Description':<20} | {'Amount':<12} | {'Category':<20}")
     print("-" * 80)
 
-    for i, expense in enumerate(expenses, start=1):
-        date = expense['date']
-        desc = expense['desc']
-        amount = expense['amount']
-        category = expense['category']
-        
-        print(f"{i:<5} | {date:<12} | {desc:<20} | RM {amount:<10.2f} | {category:<20}")
+    for row in rows:
+        print(f"{row['id']:<5} | {row['date']:<12} | {row['description']:<20} | RM {row['amount']:<9.2f} | {row['category']:<20}")
+    
+    return True
 
 def edit_expense():
-    view_expenses()
-
+    if not view_expenses():
+        return
+    
     while True:
-        choice = input("\nPlease select the no. of the expense you want to edit ( or q to cancel ): ")
+        choice = input("\nPlease select the ID of the expense you want to edit ( or q to cancel ): ")
 
         if choice.lower() == 'q':
-            print("Cancelled edit process\n")
+            print("Cancelled edit process")
             break
 
         try:
             item_no = int(choice)
+            cursor.execute("SELECT * FROM expenses WHERE id = ?", (item_no,))
+            target = cursor.fetchone()
 
-            if item_no <= 0 or item_no > len(expenses) :
-                print("please enter a valid range")
+            if not target:
+                print("ID not found. Please enter a valid ID from the table.")
+                continue
+            
+            edit_category = input("Please type the category you want to edit (eg. Date/Description/Amount): ")
 
-            else:
-                edit_category = input("Please type the category you want to edit (eg. Date/Description/Amount): ")
-
-                if edit_category.lower() == 'date':
-                    while True:
-                        new_date = input("Enter new date: ")
-                        try:
-                            datetime.strptime(new_date,"%d/%m/%Y")
-                            expenses[item_no-1]['date'] = new_date
-                            print("Edit Success!")
-                            save_expenses()
-                            break
-                        except ValueError:
-                            print("Invalid date format. Please exactly match DD/MM/YYYY.")
-
-                elif edit_category.lower() == 'description' :
-                    new_description = input("Enter new description: ")
-                    expenses[item_no-1]['desc'] = new_description
-                    print("Edit success!")
-                    save_expenses()
-                    break
-
-                elif edit_category.lower() == 'amount' :
-                    new_amount = input("Enter new amount (RM) : ")
+            if edit_category.lower() == 'date':
+                while True:
+                    new_date = input("Enter new date: ")
                     try:
-                        new = float(new_amount)
-
-                        if new <0 :
-                            print("Edit failed, Please enter positive number")
-
-                        else:
-                            expenses[item_no -1]['amount'] = new
-                            print("Edit success!")
-                            save_expenses()
-                            break
-
+                        datetime.strptime(new_date,"%d/%m/%Y")
+                        cursor.execute("UPDATE expenses SET date = ? WHERE id = ?", (new_date, item_no))
+                        conn.commit()
+                        print("Edit Success!")
+                        break
                     except ValueError:
-                        print("Edit failed, please enter valid input")
+                        print("Invalid date format. Please exactly match DD/MM/YYYY.")
+
+            elif edit_category.lower() == 'description' :
+                new_description = input("Enter new description: ")
+                cursor.execute("UPDATE expenses SET description = ? WHERE id = ?", (new_description, item_no))
+                conn.commit()
+                print("Edit Success!")
+                break
+
+            elif edit_category.lower() == 'amount' :
+                new_amount = input("Enter new amount (RM) : ")
+                try:
+                    new = float(new_amount)
+
+                    if new <0 :
+                        print("Edit failed, Please enter positive number")
+
+                    else:
+                        cursor.execute("UPDATE expenses SET amount = ? WHERE id = ?", (new, item_no))
+                        conn.commit()
+                        print("Edit success!")
+                        break
+
+                except ValueError:
+                    print("Edit failed, please enter valid input")
 
 
         except ValueError:
             print("Please enter a valid input")
 
 def delete_expense():
+    if not view_expenses():
+        return
     view_expenses()
 
     while True:
@@ -184,18 +187,21 @@ def delete_expense():
 
         try: 
             item_no = int(choice)
+            # Check if the ID exists and fetch it so we can print the success message
+            cursor.execute("SELECT description, amount FROM expenses WHERE id = ?", (item_no,))
+            target = cursor.fetchone()
 
-            if item_no <0 or item_no > len(expenses):
-                print("Please enter number greater than 0")
-
-            else:
-                deleted_item = expenses.pop(item_no -1)
-                print(f"Success! Deleted {deleted_item['desc']}(RM{deleted_item['amount']})")
-                save_expenses()
-                break
+            if not target:
+                print("ID not found. Please enter a valid ID from the table.")
+                continue
+                
+            cursor.execute("DELETE FROM expenses WHERE id = ?", (item_no,))
+            conn.commit()
+            print(f"Success! Deleted {target['description']} (RM {target['amount']})")
+            break
 
         except ValueError:
-            print("Please enter a valid input")
+            print("Please enter a valid numeric ID.")
 
 def calculate_total(data_list):
     total = 0
@@ -213,23 +219,16 @@ def expenses_summary():
     print("3. Filter by Category")
     
     choice = input("Choose a filter option: ")
-    filtered_list = []
 
     if choice == '1':
         # View All: Just use the master list
-        filtered_list = expenses
+        cursor.execute("SELECT * FROM expenses")
 
     elif choice == '2':
         # Filter by Month
         month = input("Enter month (MM) e.g., 10 : ")
-        for expense in expenses:
-            # date format is strictly DD/MM/YYYY
-            # .split('/') turns "14/10/2026" into a list: ['14', '10', '2026']
-            date_parts = expense['date'].split('/')
-            
-            # Check if the month (index 1) matches the user's input
-            if len(date_parts) == 3 and date_parts[1] == month:
-                filtered_list.append(expense)
+        # Using SQL wildcards. _ means any character. __/MM/____ perfectly matches DD/MM/YYYY
+        cursor.execute("SELECT * FROM expenses WHERE date LIKE ?", (f"__/{month}/____",))
 
     elif choice == '3':
         # Filter by Category
@@ -241,9 +240,7 @@ def expenses_summary():
         selected_cat = cat_menu.get(cat_choice)
         
         if selected_cat:
-            for expense in expenses:
-                if expense.get('category') == selected_cat:
-                    filtered_list.append(expense)
+            cursor.execute("SELECT * FROM expenses WHERE category = ?", (selected_cat,))
         else:
             print("Invalid category selection.")
             return
@@ -252,8 +249,10 @@ def expenses_summary():
         print("Invalid choice.")
         return
 
-    # --- Display the Results ---
-    if not filtered_list:
+    # Fetch the results based on whichever query ran above
+    rows = cursor.fetchall()
+
+    if not rows:
         print("\nNo expenses found for this filter.")
         return
 
@@ -261,16 +260,13 @@ def expenses_summary():
     print("\n"+"=" * 75)
     print(f"{'Date':<12} | {'Category':<20} | {'Description':<20} | {'Amount'}")
     print("=" * 75)
-    for exp in filtered_list:
-        # Use .get() for category just in case older saved data doesn't have it
-        cat = exp.get('category', 'Uncategorized')
-        print(f"{exp['date']:<12} | {cat:<20} | {exp['desc']:<20} | RM {exp['amount']:<10.2f}")
+    for row in rows:
+        print(f"{row['date']:<12} | {row['category']:<20} | {row['description']:<20} | RM {row['amount']:<10.2f}")
 
-    # Pass our newly created list to the math function!
-    calculate_total(filtered_list)
+    calculate_total(rows)
 
 def main():
-    load_expenses()
+    setup_database()
     while True:
         clear_screen()
         print("="*30)
@@ -302,6 +298,7 @@ def main():
             pause()
         elif choice == '6':
             print("Thanks for using!")
+            conn.close()
             break
         else:
             print("Invalid choice, try again.")
