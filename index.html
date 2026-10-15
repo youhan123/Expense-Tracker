@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title> Expenses Tracker </title>
+        <link rel="stylesheet" href="style.css">
+    </head>
+    <body>
+        <h1>Expenses Tracker</h1>
+        <hr>
+        
+        <h2>Add new expenses</h2>
+        
+        <!-- The form opens here -->
+        <form> 
+            <label> Date: </label>
+            <input type="date" id="dateInput"> 
+            <br><br>
+
+            <label> Category: </label>
+            <select id="categoryInput"> 
+                <option value="Food"> Food and Beverages</option>
+                <option value="bills"> Billings</option>
+                <option value="Entertainment"> Entertainment</option>
+                <option value="Others"> Others</option>
+            </select>
+            <br><br>
+
+            <label> Description: </label>
+            <input type="text" id="descInput">
+            <br><br>
+
+            <label> Amount (RM): </label>
+            <input type="number" id="amountInput" step="0.01">
+            <br><br>
+
+            <!-- FIX 1: Added onclick="captureData()" -->
+            <button type="button" onclick="captureData()">Save Expense</button>
+            
+        </form> 
+
+        <!-- FIX 2: Changed scr to src -->
+        <script src="script.js"></script>
+    </body>
+</html>
