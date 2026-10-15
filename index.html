@@ -1,44 +1,84 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title> Expenses Tracker </title>
+        <title>Expense Dashboard</title>
         <link rel="stylesheet" href="style.css">
     </head>
     <body>
-        <h1>Expenses Tracker</h1>
-        <hr>
-        
-        <h2>Add new expenses</h2>
-        
-        <!-- The form opens here -->
-        <form> 
-            <label> Date: </label>
-            <input type="date" id="dateInput"> 
-            <br><br>
-
-            <label> Category: </label>
-            <select id="categoryInput"> 
-                <option value="Food"> Food and Beverages</option>
-                <option value="bills"> Billings</option>
-                <option value="Entertainment"> Entertainment</option>
-                <option value="Others"> Others</option>
-            </select>
-            <br><br>
-
-            <label> Description: </label>
-            <input type="text" id="descInput">
-            <br><br>
-
-            <label> Amount (RM): </label>
-            <input type="number" id="amountInput" step="0.01">
-            <br><br>
-
-            <!-- FIX 1: Added onclick="captureData()" -->
-            <button type="button" onclick="captureData()">Save Expense</button>
+        <!-- The Master Box holding everything -->
+        <div class="dashboard-container">
             
-        </form> 
+            <!-- LEFT SIDEBAR -->
+            <div class="sidebar">
+                <div class="profile">
+                    <h2>👤 User Profile</h2>
+                    <p>Free Plan</p>
+                </div>
+                <hr>
+                <p>📊 Dashboard</p>
+                <p>💳 Transactions</p>
+                <p>⚙️ Settings</p>
+            </div>
 
-        <!-- FIX 2: Changed scr to src -->
+            <!-- RIGHT MAIN CONTENT -->
+            <div class="main-content">
+                <h1>Overview</h1>
+                
+                <!-- TOP ROW: SUMMARY CARDS -->
+                <div class="row">
+                    <div class="card">
+                        <p>Monthly Budget</p>
+                        <h2>RM 3,000.00</h2>
+                    </div>
+                    <div class="card">
+                        <p>Daily Average Spend</p>
+                        <h2>RM 42.50</h2>
+                    </div>
+                    <div class="card">
+                        <p>Top Category</p>
+                        <h2>🍔 Food</h2>
+                    </div>
+                </div>
+
+                <!-- BOTTOM ROW: FORM & TRANSACTIONS -->
+                <div class="row">
+                    
+                    <!-- Your exact form, now inside a card! -->
+                    <div class="card">
+                        <h2>Add Expense</h2>
+                        <form> 
+                            <label>Date:</label><br>
+                            <input type="date" id="dateInput"><br><br>
+
+                            <label>Category:</label><br>
+                            <select id="categoryInput"> 
+                                <option value="Food">Food and Beverages</option>
+                                <option value="Bills">Billings</option>
+                                <option value="Entertainment">Entertainment</option>
+                                <option value="Others">Others</option>
+                            </select><br><br>
+
+                            <label>Description:</label><br>
+                            <input type="text" id="descInput"><br><br>
+
+                            <label>Amount (RM):</label><br>
+                            <input type="number" id="amountInput" step="0.01"><br><br>
+
+                            <button type="button" onclick="captureData()">Save Expense</button>
+                        </form> 
+                    </div>
+
+                    <!-- The Recent Transactions Box -->
+                    <div class="card">
+                        <h2>Recent Transactions</h2>
+                        <p>No transactions yet. Add one to see it here!</p>
+                        <!-- We will build the data table here next -->
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        
         <script src="script.js"></script>
     </body>
 </html>
