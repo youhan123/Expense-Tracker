@@ -1,84 +1,176 @@
 <!DOCTYPE html>
-<html>
-    <head>
-        <title>Expense Dashboard</title>
-        <link rel="stylesheet" href="style.css">
-    </head>
-    <body>
-        <!-- The Master Box holding everything -->
-        <div class="dashboard-container">
-            
-            <!-- LEFT SIDEBAR -->
-            <div class="sidebar">
-                <div class="profile">
-                    <h2>👤 User Profile</h2>
-                    <p>Free Plan</p>
-                </div>
-                <hr>
-                <p>📊 Dashboard</p>
-                <p>💳 Transactions</p>
-                <p>⚙️ Settings</p>
-            </div>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Expense Tracker - overview of your spending.">
+  <title>Expense Tracker | Dashboard</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="script.js" defer></script>
+</head>
+<body>
 
-            <!-- RIGHT MAIN CONTENT -->
-            <div class="main-content">
-                <h1>Overview</h1>
-                
-                <!-- TOP ROW: SUMMARY CARDS -->
-                <div class="row">
-                    <div class="card">
-                        <p>Monthly Budget</p>
-                        <h2>RM 3,000.00</h2>
-                    </div>
-                    <div class="card">
-                        <p>Daily Average Spend</p>
-                        <h2>RM 42.50</h2>
-                    </div>
-                    <div class="card">
-                        <p>Top Category</p>
-                        <h2>🍔 Food</h2>
-                    </div>
-                </div>
+  <div class="app" id="app">
 
-                <!-- BOTTOM ROW: FORM & TRANSACTIONS -->
-                <div class="row">
-                    
-                    <!-- Your exact form, now inside a card! -->
-                    <div class="card">
-                        <h2>Add Expense</h2>
-                        <form> 
-                            <label>Date:</label><br>
-                            <input type="date" id="dateInput"><br><br>
+    <!-- ==================== SIDEBAR ==================== -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-brand">
+        <span class="logo-icon" aria-hidden="true">RM</span>
+        <span class="app-name">Expense Tracker</span>
+      </div>
 
-                            <label>Category:</label><br>
-                            <select id="categoryInput"> 
-                                <option value="Food">Food and Beverages</option>
-                                <option value="Bills">Billings</option>
-                                <option value="Entertainment">Entertainment</option>
-                                <option value="Others">Others</option>
-                            </select><br><br>
+      <nav class="sidebar-nav" aria-label="Main navigation">
+        <ul class="nav-list">
+          <li class="nav-item">
+            <a class="nav-link active" href="index.html" aria-current="page">
+              <span class="nav-icon" aria-hidden="true">D</span>
+              <span class="nav-text">Dashboard</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="expenses.html">
+              <span class="nav-icon" aria-hidden="true">E</span>
+              <span class="nav-text">Expenses</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#reports">
+              <span class="nav-icon" aria-hidden="true">R</span>
+              <span class="nav-text">Reports</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#settings">
+              <span class="nav-icon" aria-hidden="true">S</span>
+              <span class="nav-text">Settings</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+    </aside>
 
-                            <label>Description:</label><br>
-                            <input type="text" id="descInput"><br><br>
+    <!-- ==================== MAIN CONTENT ==================== -->
+    <main class="main-content" id="main-content">
 
-                            <label>Amount (RM):</label><br>
-                            <input type="number" id="amountInput" step="0.01"><br><br>
+      <!-- Page header -->
+      <header class="page-header">
+        <button type="button" id="menu-toggle" class="menu-toggle" aria-controls="sidebar" aria-expanded="false">
+          Menu
+        </button>
 
-                            <button type="button" onclick="captureData()">Save Expense</button>
-                        </form> 
-                    </div>
-
-                    <!-- The Recent Transactions Box -->
-                    <div class="card">
-                        <h2>Recent Transactions</h2>
-                        <p>No transactions yet. Add one to see it here!</p>
-                        <!-- We will build the data table here next -->
-                    </div>
-
-                </div>
-            </div>
+        <div class="page-title-group">
+          <h1 class="page-title">Dashboard</h1>
+          <p class="page-description">Overview of your spending</p>
         </div>
-        
-        <script src="script.js"></script>
-    </body>
+
+        <div class="header-actions">
+          <!-- Submitting this form opens expenses.html?q=your-search (no JavaScript needed) -->
+          <form class="header-search" action="expenses.html" method="get" role="search">
+            <label for="global-search" class="visually-hidden">Search expenses</label>
+            <input type="search" id="global-search" name="q" placeholder="Search expenses...">
+          </form>
+
+          <button type="button" id="theme-toggle" class="theme-toggle" aria-pressed="false">
+            Dark mode
+          </button>
+
+          <div class="user-profile" id="user-profile">
+            <span class="avatar" aria-hidden="true">AB</span>
+            <span class="user-name">Your Name</span>
+          </div>
+        </div>
+      </header>
+
+      <!-- Summary cards -->
+      <section class="summary-section" aria-labelledby="summary-heading">
+        <h2 id="summary-heading" class="visually-hidden">Summary</h2>
+
+        <div class="summary-cards">
+          <article class="summary-card" id="card-total-expenses">
+            <h3 class="summary-card-title">Total Expenses</h3>
+            <p class="summary-card-value" id="total-expenses">RM 1,250.00</p>
+          </article>
+
+          <article class="summary-card" id="card-monthly-expenses">
+            <h3 class="summary-card-title">This Month</h3>
+            <p class="summary-card-value" id="monthly-expenses">RM 450.00</p>
+          </article>
+
+          <article class="summary-card" id="card-expense-count">
+            <h3 class="summary-card-title">Total Transactions</h3>
+            <p class="summary-card-value" id="expense-count">24</p>
+          </article>
+
+          <article class="summary-card" id="card-highest-expense">
+            <h3 class="summary-card-title">Highest Expense</h3>
+            <p class="summary-card-value" id="highest-expense">RM 180.00</p>
+          </article>
+        </div>
+      </section>
+
+      <!-- Expense overview: horizontal bar chart (one <progress> bar per category) -->
+      <section class="overview-section" id="expense-overview" aria-labelledby="overview-heading">
+        <header class="section-header">
+          <h2 id="overview-heading" class="section-title">Expense Overview</h2>
+          <a class="btn btn-secondary" href="expenses.html">View all expenses</a>
+          <p class="section-description">Spending by category this month</p>
+        </header>
+
+        <ul class="chart-list" id="expense-chart">
+          <li class="chart-row" data-category="food">
+            <label class="chart-label" for="chart-food">Food &amp; Beverages</label>
+            <progress class="chart-bar chart-bar-food" id="chart-food" max="100" value="40">40%</progress>
+            <span class="chart-amount" id="chart-food-amount">RM 180.00</span>
+          </li>
+          <li class="chart-row" data-category="bills">
+            <label class="chart-label" for="chart-bills">Bills</label>
+            <progress class="chart-bar chart-bar-bills" id="chart-bills" max="100" value="27">27%</progress>
+            <span class="chart-amount" id="chart-bills-amount">RM 120.00</span>
+          </li>
+          <li class="chart-row" data-category="transport">
+            <label class="chart-label" for="chart-transport">Transport</label>
+            <progress class="chart-bar chart-bar-transport" id="chart-transport" max="100" value="18">18%</progress>
+            <span class="chart-amount" id="chart-transport-amount">RM 80.00</span>
+          </li>
+          <li class="chart-row" data-category="entertainment">
+            <label class="chart-label" for="chart-entertainment">Entertainment</label>
+            <progress class="chart-bar chart-bar-entertainment" id="chart-entertainment" max="100" value="11">11%</progress>
+            <span class="chart-amount" id="chart-entertainment-amount">RM 50.00</span>
+          </li>
+          <li class="chart-row" data-category="others">
+            <label class="chart-label" for="chart-others">Others</label>
+            <progress class="chart-bar chart-bar-others" id="chart-others" max="100" value="4">4%</progress>
+            <span class="chart-amount" id="chart-others-amount">RM 20.00</span>
+          </li>
+        </ul>
+      </section>
+
+      <footer class="page-footer">
+        <p>Expense Tracker V3 &ndash; HTML, CSS and JavaScript</p>
+      </footer>
+    </main>
+  </div>
+
+  <!-- ==================== TOAST NOTIFICATIONS ==================== -->
+  <div class="toast-container" id="toast-container" aria-live="polite">
+    <div class="toast toast-success" id="toast-success" role="status" hidden>
+      <span class="toast-icon" aria-hidden="true">&#10003;</span>
+      <p class="toast-message">Done successfully</p>
+      <button type="button" class="toast-close" aria-label="Dismiss notification">&times;</button>
+    </div>
+
+    <div class="toast toast-error" id="toast-error" role="alert" hidden>
+      <span class="toast-icon" aria-hidden="true">!</span>
+      <p class="toast-message">Something went wrong. Please try again.</p>
+      <button type="button" class="toast-close" aria-label="Dismiss notification">&times;</button>
+    </div>
+
+    <div class="toast toast-warning" id="toast-warning" role="status" hidden>
+      <span class="toast-icon" aria-hidden="true">!</span>
+      <p class="toast-message">Please check your input and try again.</p>
+      <button type="button" class="toast-close" aria-label="Dismiss notification">&times;</button>
+    </div>
+  </div>
+
+</body>
 </html>
